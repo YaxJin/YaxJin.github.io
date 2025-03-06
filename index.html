@@ -1,15 +1,149 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-    <script type="module" crossorigin src="/assets/index.e33b04f3.js"></script>
-    <link rel="stylesheet" href="/assets/index.f3fa6de6.css">
-  </head>
-  <body>
-    <div id="app">test for Demo</div>
-    
-  </body>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ya Jin</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #0d1117;
+            color: #ffffff;
+        }
+        #app {
+            display: flex;
+            width: 100%;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #161b22;
+            padding: 20px;
+            text-align: center;
+            border-right: 2px solid #30363d;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: url('https://via.placeholder.com/100') no-repeat center/cover;
+            margin: 0 auto 15px;
+            border: 3px solid #58a6ff;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        .tree-container {
+            width: 100%;
+            height: 500px;
+        }
+        @media (max-width: 768px) {
+            #app {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 2px solid #30363d;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="sidebar">
+            <div class="avatar"></div>
+            <h2>{{ name }}</h2>
+            <p>{{ bio }}</p>
+        </div>
+        <div class="content">
+            <div class="tree-container">
+                <svg width="100%" height="100%"></svg>
+            </div>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    name: 'Ya Jin',
+                    bio: 'A passionate developer with expertise in C and Python, enthusiastic about networking technologies and IoT.',
+                    skills: {
+                        name: "Skills",
+                        children: [
+                            { name: "Programming", children: [
+                                { name: "C" }, { name: "Python" }, { name: "Java" }
+                            ] },
+                            { name: "Networking", children: [
+                                { name: "TCP/IP" }, { name: "SNMP" }, { name: "MQTT" }
+                            ] },
+                            { name: "IoT", children: [
+                                { name: "Embedded Systems" }, { name: "Smart Devices" }
+                            ] }
+                        ]
+                    }
+                };
+            },
+            mounted() {
+                this.drawTree();
+            },
+            methods: {
+                drawTree() {
+                    const width = document.querySelector(".tree-container").clientWidth;
+                    const height = 500;
+                    const svg = d3.select("svg")
+                        .attr("width", width)
+                        .attr("height", height)
+                        .append("g")
+                        .attr("transform", "translate(50, 50)");
+
+                    const treeLayout = d3.tree().size([width - 100, height - 100]);
+                    const root = d3.hierarchy(this.skills);
+                    treeLayout(root);
+
+                    svg.selectAll("line")
+                        .data(root.links())
+                        .enter()
+                        .append("line")
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y)
+                        .attr("stroke", "#58a6ff");
+
+                    svg.selectAll("circle")
+                        .data(root.descendants())
+                        .enter()
+                        .append("circle")
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y)
+                        .attr("r", 6)
+                        .attr("fill", "#58a6ff");
+
+                    svg.selectAll("text")
+                        .data(root.descendants())
+                        .enter()
+                        .append("text")
+                        .attr("x", d => d.x + 10)
+                        .attr("y", d => d.y + 5)
+                        .attr("fill", "#ffffff")
+                        .text(d => d.data.name);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
 </html>
